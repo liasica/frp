@@ -13,6 +13,7 @@
           </el-popover>
   
           <el-button v-popover:popover4 type="primary" size="small" icon="view" :name="props.row.name" style="margin-bottom:10px" @click="fetchData2">Traffic Statistics</el-button>
+          <el-button type="danger" size="small" @click="terminateProxy">Terminate</el-button>
   
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="Name">
@@ -111,6 +112,14 @@
             for (let proxyStats of json.proxies) {
               this.proxies.push(new TcpProxy(proxyStats))
             }
+          })
+      },
+      terminateProxy() {
+        fetch('../api/proxy/terminate', {credentials: 'include', method: 'POST'})
+          .then(res => {
+            return res.json()
+          }).then(json => {
+            console.info(json)
           })
       }
     },

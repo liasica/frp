@@ -333,3 +333,27 @@ func (svr *Service) APIProxyTraffic(w http.ResponseWriter, r *http.Request) {
 	buf, _ := json.Marshal(&trafficResp)
 	res.Msg = string(buf)
 }
+
+func (svr *Service) APIProxyTerminate(w http.ResponseWriter, r *http.Request) {
+	res := GeneralResponse{Code: 200}
+	params := mux.Vars(r)
+	name := params["name"]
+
+	defer func() {
+		log.Info("Http response [%s]: code [%d]", r.URL.Path, res.Code)
+		w.WriteHeader(res.Code)
+		if len(res.Msg) > 0 {
+			_, _ = w.Write([]byte(res.Msg))
+		}
+	}()
+	log.Info("Http request: [%s]", r.URL.Path)
+
+	if pxy, ok := svr.pxyManager.GetByName(name); ok {
+		pxy.Close()
+		res.Msg = "proxy terminated"
+		return
+	}
+
+	res.Code = 404
+	res.Msg = "no proxy info found"
+}
